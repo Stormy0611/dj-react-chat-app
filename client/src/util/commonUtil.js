@@ -1,6 +1,8 @@
 import jwt_decode from "jwt-decode";
 import Constants from "../lib/constants";
 import CookieUtil from "./cookieUtil";
+import ApiConnector from "../api/apiConnector";
+import ApiEndpoints from "../api/apiEndpoints";
 
 const is_date = (date) => {
   if (Object.prototype.toString.call(date) === "[object Date]") {
@@ -28,12 +30,8 @@ const getTimeFromDate = (date) => {
 };
 
 const getUserId = () => {
-  let token = CookieUtil.getCookie(Constants.ACCESS_PROPERTY);
-  if (token) {
-    let decodedToken = jwt_decode(token);
-    return decodedToken.userId;
-  }
-  return "";
+  let userId = localStorage.getItem('user_id');
+  return userId;
 };
 
 const getFormatedChatUser = (chatUsers, onlineUserList) => {
@@ -62,7 +60,8 @@ const getFormatedChatUser = (chatUsers, onlineUserList) => {
 };
 
 const getActiveChatId = (match) => {
-  return match && match.params ? match.params.chatId : null;
+  // return match && match.params ? match.params.chatId : null;
+  return localStorage.getItem("channel_id");
 };
 
 const CommonUtil = {

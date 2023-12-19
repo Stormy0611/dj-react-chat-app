@@ -54,6 +54,7 @@ const Sidebar = (props) => {
   const fetchUsers = async () => {
     const url = ApiEndpoints.USER_URL + "?exclude=" + getConnectedUserIds();
     const users = await ApiConnector.sendGetRequest(url);
+    console.log(users)
     setUsers(users);
   };
 
@@ -86,6 +87,7 @@ const Sidebar = (props) => {
   const logoutClickHandler = () => {
     CookieUtil.deleteCookie(Constants.ACCESS_PROPERTY);
     CookieUtil.deleteCookie(Constants.REFRESH_PROPERTY);
+    localStorage.clear();
     window.location.href = AppPaths.LOGIN;
   };
 

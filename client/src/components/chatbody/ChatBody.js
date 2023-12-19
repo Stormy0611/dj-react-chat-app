@@ -10,6 +10,14 @@ import "./chatBodyStyle.css";
 let socket = new WebSocket(
   ServerUrl.WS_BASE_URL + `ws/users/${CommonUtil.getUserId()}/chat/`
 );
+if (socket) {
+  socket.onopen = (event) => {
+    
+  }
+  socket.onclose = (event) => {
+    localStorage.clear();
+  }
+}
 let typingTimer = 0;
 let isTypingSignalSent = false;
 
@@ -25,9 +33,10 @@ const ChatBody = ({ match, currentChattingMember, setOnlineUserList }) => {
         ApiEndpoints.CHAT_MESSAGE_URL.replace(
           Constants.CHAT_ID_PLACE_HOLDER,
           currentChatId
-        ) + "?limit=20&offset=0";
+        );
       const chatMessages = await ApiConnector.sendGetRequest(url);
       setMessages(chatMessages);
+      console.log(chatMessages);
     }
   };
 
@@ -46,21 +55,29 @@ const ChatBody = ({ match, currentChattingMember, setOnlineUserList }) => {
     const data = JSON.parse(event.data);
     const chatId = CommonUtil.getActiveChatId(match);
     const userId = CommonUtil.getUserId();
-    if (chatId === data.roomId) {
-      if (data.action === SocketActions.MESSAGE) {
-        data["userImage"] = ServerUrl.BASE_URL.slice(0, -1) + data.userImage;
-        setMessages((prevState) => {
-          let messagesState = JSON.parse(JSON.stringify(prevState));
-          messagesState.results.unshift(data);
-          return messagesState;
-        });
-        setTyping(false);
-      } else if (data.action === SocketActions.TYPING && data.user !== userId) {
-        setTyping(data.typing);
-      }
+    if (data.action === SocketActions.CHANNEL_LIST) {
+      // Show Rooms in Side bar
+      localStorage.setItem("channel_list", data.channel_list)
+      data.channel_list.length && localStorage.setItem("channel_id", data.channel_list[0]["channel_id"]);
+      console.log(data)
     }
-    if (data.action === SocketActions.ONLINE_USER) {
-      setOnlineUserList(data.userList);
+    if (chatId == data.channel_id) {
+      if (data.action === SocketActions.MESSAGE) {
+        if (data.user_id != userId) {
+          console.log(data);
+        }
+        // data["user_image"] = ServerUrl.BASE_URL.slice(0, -1) + data.user_image;
+        // setMessages((prevState) => {
+        //   let messagesState = JSON.parse(JSON.stringify(prevState));
+        //   messagesState.results.unshift(data);
+        //   return messagesState;
+        // });
+        setTyping(false);
+        
+      } else if (data.action === SocketActions.TYPING && data.user_id !== userId) {
+        setTyping(data.typing);
+        console.log(data)
+      }
     }
   };
 
@@ -71,8 +88,8 @@ const ChatBody = ({ match, currentChattingMember, setOnlineUserList }) => {
         JSON.stringify({
           action: SocketActions.MESSAGE,
           message: inputMessage,
-          user: CommonUtil.getUserId(),
-          roomId: CommonUtil.getActiveChatId(match),
+          user_id: CommonUtil.getUserId(),
+          channel_id: CommonUtil.getActiveChatId(match),
         })
       );
     }
@@ -84,8 +101,8 @@ const ChatBody = ({ match, currentChattingMember, setOnlineUserList }) => {
       JSON.stringify({
         action: SocketActions.TYPING,
         typing: typing,
-        user: CommonUtil.getUserId(),
-        roomId: CommonUtil.getActiveChatId(match),
+        user_id: CommonUtil.getUserId(),
+        channel_id: CommonUtil.getActiveChatId(match),
       })
     );
   };
@@ -100,7 +117,7 @@ const ChatBody = ({ match, currentChattingMember, setOnlineUserList }) => {
       typingTimer = setTimeout(() => {
         sendTypingSignal(false);
         isTypingSignalSent = false;
-      }, 3000);
+      }, 2000);
     } else {
       clearTimeout(typingTimer);
       isTypingSignalSent = false;

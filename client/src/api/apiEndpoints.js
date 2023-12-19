@@ -1,10 +1,10 @@
 const ApiEndpoints = {
-  SIGN_UP_URL: "api/v1/signup",
-  LOGIN_URL: "api/v1/login",
-  USER_URL: "api/v1/users",
-  CHAT_URL: "api/v1/chats",
-  USER_CHAT_URL: "api/v1/users/<userId>/chats",
-  CHAT_MESSAGE_URL: "api/v1/chats/<chatId>/messages",
+  SIGN_UP_URL: "v1/auth/register",
+  LOGIN_URL: "v1/auth/login",
+  USER_URL: "v1/auth/user",
+  CHAT_URL: "v1/comm/chats/channel",
+  USER_CHAT_URL: "v1/comm/chats/<userId>/channel",
+  CHAT_MESSAGE_URL: "v1/comm/chats/<chatId>/messages",
 };
 
 export default ApiEndpoints;

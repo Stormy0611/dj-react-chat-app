@@ -5,6 +5,7 @@ import ApiConnector from "../../../api/apiConnector";
 import ApiEndpoints from "../../../api/apiEndpoints";
 import AppPaths from "../../../lib/appPaths";
 import CookieUtil from "../../../util/cookieUtil";
+import Constants from "../../../lib/constants";
 import "../authStyle.css";
 
 const LoginScreen = ({ location }) => {
@@ -17,16 +18,20 @@ const LoginScreen = ({ location }) => {
   const onSubmit = async (loginData) => {
     const successLoginData = await ApiConnector.sendPostRequest(
       ApiEndpoints.LOGIN_URL,
-      JSON.stringify(loginData),
+      JSON.stringify({email: loginData.username, password: loginData.password}),
       false,
       false
     );
-    if (successLoginData) {
-      Object.keys(successLoginData).forEach((key) => {
-        CookieUtil.setCookie(key, successLoginData[key]);
-      });
+    CookieUtil.setCookie(Constants.ACCESS_PROPERTY, successLoginData.token);
+    const userInfo = await ApiConnector.sendGetRequest(ApiEndpoints.USER_URL);
+    localStorage.setItem("user_id", userInfo.data.UserID);
+    // if (successLoginData) {
+    //   Object.keys(successLoginData).forEach((key) => {
+    //     CookieUtil.setCookie(key, successLoginData[key]);
+    //   });
+    //   console.log(CookieUtil)
       window.location.href = AppPaths.HOME;
-    }
+    // }
   };
 
   const getLoginMessage = () => {
